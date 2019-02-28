@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>list</title>
+	<link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+	html,body{
+		margin:0;
+		padding:0;
+	}
+	body{
+		background-color:#f5f5f5;
+	}
+	.box{
+		text-align: center;
+		width:100%;
+	}
+	span#redLeft,span#blueRight{
+		border-radius: 50%;
+		height: 300px;
+		width: 300px;
+		color: #fff;
+		line-height: 300px;
+		text-align: center;
+		font-size: 80px;
+		display: inline-block;
+		margin:50px 40px;
+	}
+	#redLeft{
+		background:linear-gradient(180deg,#52a5f4,#004ef5);
+		position: relative;
+	}
+	#blueRight{
+		background:linear-gradient(180deg,#f76083,#f82254);
+		position: relative;
+	}
+	#red img,#blue img{
+		width:50px;
+		height:50px;
+		border-radius: 50%;
+	}
+	.redList,.blueList{
+		width:45%;
+		height:100px;
+	}
+	.left,.right{
+		width:50%;
+		display: flex;
+		justify-content:center;
+		flex-direction:column;
+		align-items: center;
+	}
+	.two{
+		display: flex;
+		justify-content:center;
+		align-items: center;
+	}
+	.contentBox{
+		background-color: #fff;
+		margin-top:20px;
+		height: 80px;
+	    line-height: 80px;
+	    border-radius: 10px;
+	    display: flex;
+		justify-content:center;
+		align-items: center;
+	}
+	.contentBox span{
+		font-size: 18px;
+	}
+	.name{
+		padding: 0 40px;
+		width: 210px;
+    	display: inline-block;
+	}
+	.stop{
+		width: 50px;
+	    height: 25px;
+	    line-height: 25px;
+	    text-align: center;
+	    border: 1px solid black;
+	    float: right;
+	}
+</style>
+<body>
+<!-- <div class="bg"></div> -->
+	<div class="stop">暂停</div>
+	<div class="box">
+		<div class="two">
+			<div class="left">
+				<span id="redLeft"></span>
+				<div class="blueList">
+					<div id="blue"></div>
+				</div>
+			</div>
+			<div class="right">
+				<span id="blueRight"></span>
+				<div class="redList">
+					<div id="red"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	
+</body>
+</html>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/countup.js/1.9.3/countUp.min.js"></script>
+<script>
+	// 数字滚动
+	var options = {
+	  useEasing: true, 
+	  useGrouping: true, 
+	  separator: ',', 
+	  decimal: '.', 
+	};
+	var demo1Value = 0
+	var	demo2Value = 0
+	var demo1 = new CountUp('redLeft', 0, 0, 0, 2.5, options);
+	var demo2 = new CountUp('blueRight', 0, 0, 0, 2.5, options);
+		demo1.start();
+		demo2.start();
+	var oldBlueValue = 0
+	var oldRedValue = 0
+
+	twoSides()
+	var t=setInterval("twoSides()", 3000);
+	$(".stop").click(function(){
+		clearTimeout(t)
+	})
+	function twoSides(){
+		// 红蓝双方总次数
+		$.ajax({
+			type:'post',
+			url:'http://data.xinxueshuo.cn/nsi-1.0/activity/TugOfWar_Count.do',
+			success: function(res){
+				demo1Value = res.data.blue
+				demo2Value = res.data.red
+	  			if(oldBlueValue != res.data.blue){
+	  			    demo1.update(demo1Value)
+	  			    oldBlueValue = demo1Value
+	  			}
+	  			if(oldRedValue != res.data.red ){
+	  				demo2.update(demo2Value) 
+	  			    oldRedValue = demo2Value
+	  			}
+				$("#redLeft").text(res.data.blue)
+				$("#blueRight").text(res.data.red)
+			},
+			error: function(){
+
+			}
+		})
+
+		// 红蓝双方列表
+		$.ajax({
+			type:'post',
+			url:'http://data.xinxueshuo.cn/nsi-1.0/activity/TugOfWar_PeopleList.do',
+			data:{
+				camp:'红'
+			},
+			success: function(res){
+				$('#red').html("")
+				for(var i=0;i<res.data.length;i++){
+					$('#red').append(
+						'<div class="contentBox"><img src="'+res.data[i].index04+'" alt=""><span class="name">'+res.data[i].index03+'</span><span>'+res.data[i].index06+'</span></div>'
+					)
+				}
+			},
+			error: function(){
+
+			}
+		})
+		
+		$.ajax({
+			type:'post',
+			url:'http://data.xinxueshuo.cn/nsi-1.0/activity/TugOfWar_PeopleList.do',
+			data:{
+				camp:'蓝'
+			},
+			success: function(res){
+				$('#blue').html("")
+				for (var i=0 ;i<res.data.length; i++) {
+					$('#blue').append(
+						'<div class="contentBox"><img src="'+res.data[i].index04+'" alt=""><span class="name">'+res.data[i].index03+'</span><span>'+res.data[i].index06+'</span></div>'
+					)
+				}
+			},
+			error: function(){
+
+			}
+		})
+	}
+
+
+	
+
+	
+</script>
